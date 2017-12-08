@@ -1,0 +1,96 @@
+function [BW,theta,Meas_val]=CircleIntensity(img,InRad,OutRad,Thres,N)
+
+%{
+Matlab code: To calculate angular Intensity
+Input parameters:
+Image to be processed, Rough size of the trap width [inner outer],
+value of the BW threshold, N number of points for theta
+
+Outputs: 
+theta, Intensity value, cropped image of the trap,
+show black and white image return for a check with center and circles marked.
+
+Make sure to crop the image such that,
+the circle lies in the center of the image
+
+%}
+% img=imread('1.png');
+if size(img,3)==3
+    G=rgb2gray(img);
+%     imshow(G);
+else
+    G=img;
+end
+B = imgaussfilt(G,10);
+% imshow(B)
+
+% D=imadjust(B);
+% surf(D)
+Size=size(B);
+%Thres=0.16;
+BW=im2bw(B,Thres);
+s = regionprops(BW,'Centroid','EquivDiameter');
+centroids = cat(1, s.Centroid);
+Diameters=cat(1, s.EquivDiameter);
+% plot(centroids(:,1),centroids(:,2), 'b*')
+% hold off
+dist=[];
+
+for i=1:numel(centroids)/2
+    
+    dist(end+1)=pdist([Size/2;centroids(i,:)]);
+end
+% [~,c]=min(dist);
+[~,c]=max(Diameters);
+center=centroids(c,:);
+
+radius=Diameters(c)/2;
+% radius=min(abs([center(1),center(1)-Size(2),center(2),center(2)-Size(1)]));
+
+
+
+% imshow(BW)
+imshow(G)
+hold on
+plot(center(1),center(2), 'b*')
+viscircles(center,radius-InRad,'Color','b')
+viscircles(center,radius+OutRad,'Color','b')
+hold off
+% Plot the radial intensity with horizontal as zero
+% N=100;
+
+th_meas=zeros(Size(1)*Size(2),1);
+dist_meas=th_meas;
+val_meas=th_meas;
+% Create a matrix containing pdist and theta wrt center and rad
+k=1;
+
+% size gives (x,y) output but to access image, we need img(y,x)
+for i=1:1:Size(1) %y
+    for j=1:1:Size(2)  %x
+        th_meas(k)=atan2(i-center(2),j-center(1));
+        dist_meas(k)=abs(pdist([i,j;center]));
+        if (dist_meas(k)<(radius+OutRad) && dist_meas(k)>(radius-InRad) )
+            val_meas(k)=G(i,j);
+        end
+        k=k+1;
+    end
+end
+
+Meas=[th_meas dist_meas val_meas];
+% Create the relevant histograms after masking
+Meas_th=th_meas(val_meas>0);
+val_meas=val_meas(val_meas>0);
+theta=linspace(-pi,pi,N+1);
+Meas_val=zeros(N,1);
+for i =2:1:numel(theta)
+    th2=theta(i);
+    th1=theta(i-1);
+    Meas_val(i-1)=sum(val_meas(and(Meas_th>th1,Meas_th<th2)));
+end
+theta=theta(1:N);
+figure()
+plot(theta,Meas_val)
+end
+
+% [BW,theta,Meas_val]=CircleIntensity(A,10,40,0.16,100);
