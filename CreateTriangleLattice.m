@@ -1,3 +1,6 @@
+% We create a triangular lattice and then draw the lattice
+
+%% Create the lattice
 num=5;
 iVal=num;
 jVal=num;
