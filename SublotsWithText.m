@@ -15,4 +15,4 @@ txt2 = ['Skewness= ' num2str(skw)];
 text(0.006,0.045,txt1)
 text(0.006,0.042,txt2)
 xlabel(['delta theta for dt=0.0072 and k=' num2str(k)])
-ylabel({'Probability of DeltaTheta';'valuesWithinBin/totalValues'})
+ylabel({'Probability of DeltaTheta';'valuesWithinBin/totalValues'})  % show result in two lines.
