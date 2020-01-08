@@ -1,0 +1,16 @@
+% In general, an FFT result will contain an amplitude and a phase.
+% Therefore, output will be complex. 
+
+% Also, in a lot of cases, it is advisable to subtract the mean from the signal to get rid of the zero frequency or the DC component.
+
+
+Img=uiopen('Path of an image')
+Cdata=Img.cdata(1:683,:) % Crop the image
+
+Mat1=double(Cdata);  % Convert uint8 to double
+X=Mat1-mean(mean(Cdata))
+% X=Mat1
+imagesc(X)
+
+Y = fft2(X);
+imagesc(abs(fftshift(Y)))
